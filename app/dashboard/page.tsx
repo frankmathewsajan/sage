@@ -8,24 +8,24 @@ export default function DashboardPage() {
   const { user } = useAuth();
 
   const steps = [
-    { title: "Learn the basics", progress: "0 / 100" },
-    { title: "Learn Important Sorting Techniques", progress: "0 / 100" },
-    { title: "Solve Problems on Arrays [Easy -> Medium -> Hard]", progress: "0 / 100" },
-    { title: "Binary Search [1D, 2D Arrays, Search Space]", progress: "0 / 100" },
-    { title: "Strings [Basic and Medium]", progress: "0 / 100" },
-    { title: "Learn LinkedList [Single LL, Double LL, Medium, Hard Problems]", progress: "0 / 100" },
-    { title: "Recursion [PatternWise]", progress: "0 / 100" },
-    { title: "Bit Manipulation [Concepts & Problems]", progress: "0 / 100" },
-    { title: "Stack and Queues [Learning, Pre-In-Post-fix, Monotonic Stack, Implementation]", progress: "0 / 100" },
-    { title: "Sliding Window & Two Pointer Combined Problems", progress: "0 / 100" },
-    { title: "Heaps [Learning, Medium, Hard Problems]", progress: "0 / 100" },
-    { title: "Greedy Algorithms [Easy, Medium/Hard]", progress: "0 / 100" },
-    { title: "Binary Trees [Traversals, Medium and Hard Problems]", progress: "0 / 100" },
-    { title: "Binary Search Trees [Concept and Problems]", progress: "0 / 100" },
-    { title: "Graphs [Concepts & Problems]", progress: "0 / 100" },
-    { title: "Dynamic Programming [Patterns and Problems]", progress: "0 / 100" },
-    { title: "Tries", progress: "0 / 100" },
-    { title: "Strings", progress: "0 / 100" },
+    { title: "Learn the basics", progress: 0 },
+    { title: "Learn Important Sorting Techniques", progress: 0 },
+    { title: "Solve Problems on Arrays [Easy -> Medium -> Hard]", progress: 0 },
+    { title: "Binary Search [1D, 2D Arrays, Search Space]", progress: 0 },
+    { title: "Strings [Basic and Medium]", progress: 0 },
+    { title: "Learn LinkedList [Single LL, Double LL, Medium, Hard Problems]", progress: 0 },
+    { title: "Recursion [PatternWise]", progress: 0 },
+    { title: "Bit Manipulation [Concepts & Problems]", progress: 0 },
+    { title: "Stack and Queues [Learning, Pre-In-Post-fix, Monotonic Stack, Implementation]", progress: 0 },
+    { title: "Sliding Window & Two Pointer Combined Problems", progress: 0 },
+    { title: "Heaps [Learning, Medium, Hard Problems]", progress: 0 },
+    { title: "Greedy Algorithms [Easy, Medium/Hard]", progress: 0 },
+    { title: "Binary Trees [Traversals, Medium and Hard Problems]", progress: 0 },
+    { title: "Binary Search Trees [Concept and Problems]", progress: 0 },
+    { title: "Graphs [Concepts & Problems]", progress: 0 },
+    { title: "Dynamic Programming [Patterns and Problems]", progress: 0 },
+    { title: "Tries", progress: 0 },
+    { title: "Strings", progress: 0 },
   ];
 
   async function handleSignOut() {
@@ -35,13 +35,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-(--background) text-slate-900">
+    <main
+      className="min-h-screen text-slate-900"
+      style={{ backgroundImage: "var(--gradient-login)" }}
+    >
       <div className="flex min-h-screen flex-row">
         <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-8 shadow-sm lg:block">
-          <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Sage</p>
-            
-          </div>
+          <div className="mb-8 pl-3" />
           <nav className="space-y-2 text-sm font-semibold text-slate-700">
             <Link className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-slate-100" href="/">
               <i className="fa-solid fa-graduation-cap text-emerald-500" aria-hidden />
@@ -85,7 +85,7 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          <section className="flex-1 bg-linear-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
+          <section className="flex-1 bg-gradient-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm lg:col-span-2">
                 <div className="mb-4 flex items-center justify-between">
@@ -93,14 +93,19 @@ export default function DashboardPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Roadmap</p>
                     <h2 className="text-xl font-semibold text-slate-900">Structured Steps</h2>
                   </div>
-                  <span className="text-xs font-semibold text-slate-500">18 steps</span>
                 </div>
                 <div className="space-y-3">
                   {steps.map((step) => (
                     <div key={step.title} className="rounded-xl border border-slate-100 bg-white/90 px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
                       <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
                         <span>{step.title}</span>
-                        <span className="text-(--accent)">{step.progress}</span>
+                        <span className="text-(--accent)">{step.progress}%</span>
+                      </div>
+                      <div className="mt-2 h-2 rounded-full bg-slate-100">
+                        <div
+                          className="h-2 rounded-full bg-(--accent) transition-all"
+                          style={{ width: `${step.progress}%` }}
+                        />
                       </div>
                     </div>
                   ))}
