@@ -2,16 +2,55 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabaseBrowser } from "@/app/lib/supabase-browser";
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
     setLoading(true);
-    // TODO: hook up real auth API
-    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
+    if (error || !data.session) {
+      setError(error?.message ?? "Unable to sign in. Check your credentials and try again.");
+      setLoading(false);
+      return;
+    }
+
+    const token = data.session.access_token;
+    document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
+
+    router.push("/dashboard");
+  }
+
+  async function onGoogle() {
+    setError(null);
+    setLoading(true);
+    const { data, error } = await supabaseBrowser.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+    if (data?.url) {
+      window.location.href = data.url;
+      return;
+    }
     setLoading(false);
   }
 
@@ -75,12 +114,15 @@ export default function LoginForm() {
         {loading ? "Signing in..." : "Resume Learning"}
       </button>
 
+      {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
+
       <div className="text-center text-xs uppercase tracking-[0.35em] text-slate-400">or</div>
 
       <div className="grid grid-cols-1 gap-3">
         <button
           type="button"
           aria-label="Continue with Google"
+          onClick={onGoogle}
           className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-(--accent)"
         >
           <i className="fa-brands fa-google text-lg" aria-hidden="true" />

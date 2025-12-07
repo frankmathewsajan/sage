@@ -2,17 +2,78 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabaseBrowser } from "@/app/lib/supabase-browser";
 
 export default function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
+    setMessage(null);
     setLoading(true);
-    // TODO: connect to real signup endpoint
-    await new Promise((resolve) => setTimeout(resolve, 800));
+
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get("name") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+    const confirm = String(formData.get("confirm") || "");
+
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabaseBrowser.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data.session?.access_token) {
+      document.cookie = `sage-auth=${data.session.access_token}; Path=/; Max-Age=604800; SameSite=Lax`;
+      router.push("/dashboard");
+      return;
+    }
+
+    setMessage("Check your email to confirm your account.");
+    setLoading(false);
+  }
+
+  async function onGoogle() {
+    setError(null);
+    setMessage(null);
+    setLoading(true);
+    const { data, error } = await supabaseBrowser.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+    if (data?.url) {
+      window.location.href = data.url;
+      return;
+    }
     setLoading(false);
   }
 
@@ -104,10 +165,14 @@ export default function SignupForm() {
         {loading ? "Creating..." : "Start My Streak"}
       </button>
 
+      {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
+      {message ? <p className="text-sm text-green-700" role="status">{message}</p> : null}
+
       <div className="grid grid-cols-1 gap-3">
         <button
           type="button"
           aria-label="Continue with Google"
+          onClick={onGoogle}
           className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:border-(--accent)"
         >
           <i className="fa-brands fa-google text-lg" aria-hidden="true" />

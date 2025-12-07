@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/app/providers/auth-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,7 +27,13 @@ export default function RootLayout({
         crossOrigin="anonymous"
         strategy="afterInteractive"
       />
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body
+        className={`${inter.variable} antialiased`}
+        style={{ overflowX: "auto", overflowY: "auto" }}
+        suppressHydrationWarning
+      >
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
