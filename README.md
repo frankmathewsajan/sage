@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Sage – Duolingo for DSA
 
-## Getting Started
+Sage is a learning platform that brings Duolingo-style spaced practice to data structures and algorithms. Built with the latest Next.js (App Router), Tailwind CSS v4, and Motion (Framer Motion for React) to deliver fast, animated learning flows.
 
-First, run the development server:
+### What we are building
+- Bite-sized DSA lessons with interactive checkpoints and spaced repetition.
+- Daily streaks, XP, and leveling to keep learners motivated.
+- Animated transitions for lessons, quizzes, and progress feedback using Motion.
+- Adaptive practice sets that ramp difficulty based on performance.
+- Accessible, keyboard-friendly UI with responsive layouts from day one.
 
+### Tech stack
+- Next.js 16 (App Router) + React 19
+- Tailwind CSS v4 (via `@tailwindcss/postcss`)
+- Motion (Framer Motion for React) for animations
+- TypeScript, ESLint (Next core web vitals rules)
+
+### Getting started
+1) Install dependencies
+```bash
+npm install
+```
+2) Run dev server
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+3) Lint
+```bash
+npm run lint
+```
+4) Build / preview
+```bash
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Project layout
+- `app/` – App Router pages, layouts, and server components.
+- `app/globals.css` – Base styles and Tailwind layers.
+- `public/` – Static assets.
+- `eslint.config.mjs` – ESLint setup (Next + TypeScript + Core Web Vitals).
+- `postcss.config.mjs` – Tailwind v4 via `@tailwindcss/postcss` plugin.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Styling guidelines (Tailwind v4)
+- Prefer utility-first; extract components only when reuse/clarity demands.
+- Use semantic spacing and sizing tokens; avoid magic numbers when possible.
+- Keep globals lean; co-locate styles with components.
+- Ensure focus states are visible; verify contrast in light/dark backgrounds.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Motion guidelines
+- Use Motion components for meaningful state changes (page/section transitions, feedback to correct/incorrect answers).
+- Favor small durations (120–220ms) and easing that communicates intent (e.g., `easeOut` on enter, `easeIn` on exit).
+- Avoid animation on initial load that blocks interaction; keep it interruptible.
 
-## Learn More
+### Accessibility
+- Keyboard-first navigation for lesson flows and quizzes.
+- Use `aria-live` regions for async feedback (correct/incorrect, XP gained).
+- Ensure all interactive elements have discernible labels and focus rings.
 
-To learn more about Next.js, take a look at the following resources:
+### Testing (initial stance)
+- Lint on every change (`npm run lint`).
+- Add component tests as UI stabilizes; prefer integration-style tests over shallow snapshots.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Roadmap (near-term)
+- Lesson model and content schema.
+- Practice session flow with streaks and XP.
+- Animated quiz transitions (Motion).
+- Theming tokens and layout shell.
+- Accessibility pass (focus order, screen reader hints, color contrast).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Contributing
+See `CONTRIBUTING.md` for workflow, coding standards, and release process. Please also review `CODE_OF_CONDUCT.md` and `SECURITY.md`.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### License
+This project is licensed under the MIT License (see `LICENSE`).
