@@ -85,7 +85,7 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          <section className="flex-1 bg-gradient-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
+          <section className="flex-1 bg-linear-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm lg:col-span-2">
                 <div className="mb-4 flex items-center justify-between">
