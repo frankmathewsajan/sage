@@ -3,34 +3,64 @@
 import Link from "next/link";
 import { supabaseBrowser } from "@/app/lib/supabase-browser";
 import { useAuth } from "@/app/providers/auth-provider";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const cookie = document.cookie
+      .split(";")
+      .find((c) => c.trim().startsWith("isAdmin="));
+    if (cookie) {
+      setIsAdmin(cookie.split("=")[1] === "true");
+    }
+  }, []);
 
   const steps = [
-    { title: "Learn the basics", progress: 0 },
-    { title: "Learn Important Sorting Techniques", progress: 0 },
-    { title: "Solve Problems on Arrays [Easy -> Medium -> Hard]", progress: 0 },
-    { title: "Binary Search [1D, 2D Arrays, Search Space]", progress: 0 },
-    { title: "Strings [Basic and Medium]", progress: 0 },
-    { title: "Learn LinkedList [Single LL, Double LL, Medium, Hard Problems]", progress: 0 },
-    { title: "Recursion [PatternWise]", progress: 0 },
-    { title: "Bit Manipulation [Concepts & Problems]", progress: 0 },
-    { title: "Stack and Queues [Learning, Pre-In-Post-fix, Monotonic Stack, Implementation]", progress: 0 },
-    { title: "Sliding Window & Two Pointer Combined Problems", progress: 0 },
-    { title: "Heaps [Learning, Medium, Hard Problems]", progress: 0 },
-    { title: "Greedy Algorithms [Easy, Medium/Hard]", progress: 0 },
-    { title: "Binary Trees [Traversals, Medium and Hard Problems]", progress: 0 },
-    { title: "Binary Search Trees [Concept and Problems]", progress: 0 },
-    { title: "Graphs [Concepts & Problems]", progress: 0 },
-    { title: "Dynamic Programming [Patterns and Problems]", progress: 0 },
-    { title: "Tries", progress: 0 },
-    { title: "Strings", progress: 0 },
+    { title: "Phase 1: The Basics (The Language of Efficiency)", progress: 0, isPhase: true },
+    { title: "Big O Notation (Time & Space Complexity)", progress: 0, isPhase: false },
+    { title: "Memory Management (Stack vs. Heap, Reference vs. Value)", progress: 0, isPhase: false },
+    { title: "Basic Arrays & Strings (Under the hood)", progress: 0, isPhase: false },
+    { title: "Phase 2: Linear Data Structures (The Toolbox)", progress: 0, isPhase: true },
+    { title: "Hash Maps (Collision handling, internal logic)", progress: 0, isPhase: false },
+    { title: "Two Pointers & Sliding Window", progress: 0, isPhase: false },
+    { title: "Linked Lists", progress: 0, isPhase: false },
+    { title: "Stacks & Queues", progress: 0, isPhase: false },
+    { title: "Phase 3: Non-Linear Data Structures (The Major League)", progress: 0, isPhase: true },
+    { title: "Recursion & Backtracking", progress: 0, isPhase: false },
+    { title: "Trees (Binary, BST, Heaps)", progress: 0, isPhase: false },
+    { title: "Graphs (BFS, DFS, Topo Sort)", progress: 0, isPhase: false },
+    { title: "Phase 4: Optimization (The Boss Battles)", progress: 0, isPhase: true },
+    { title: "Dynamic Programming", progress: 0, isPhase: false },
+    { title: "Greedy Algorithms", progress: 0, isPhase: false },
+    { title: "Bit Manipulation", progress: 0, isPhase: false },
+  ];
+
+  const phases = steps.reduce((acc, step) => {
+    if (step.isPhase) {
+      acc.push({
+        title: step.title,
+        items: [],
+      });
+    } else {
+      acc[acc.length - 1].items.push(step);
+    }
+    return acc;
+  }, [] as { title: string; items: typeof steps }[]);
+
+  const phaseColors = [
+    "bg-gradient-to-br from-amber-50 to-white",
+    "bg-gradient-to-br from-red-50 to-white",
+    "bg-gradient-to-br from-purple-50 to-white",
+    "bg-gradient-to-br from-slate-50 to-white",
   ];
 
   async function handleSignOut() {
     await supabaseBrowser.auth.signOut();
     document.cookie = "sage-auth=; Path=/; Max-Age=0; SameSite=Lax";
+    document.cookie = "isAdmin=; Path=/; Max-Age=0; SameSite=Lax";
     window.location.href = "/login";
   }
 
@@ -71,46 +101,73 @@ export default function DashboardPage() {
         </aside>
 
         <div className="relative flex flex-1 flex-col">
-          <header className="fixed right-0 top-0 left-0 lg:left-64 flex items-center justify-end border-b border-slate-200 bg-white/90 px-6 py-4 shadow-sm">
+          <header className="fixed right-0 top-0 left-0 flex items-center justify-end border-b border-slate-200 bg-white/90 px-6 py-4 shadow-sm lg:left-64">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-slate-800">
                 {user?.user_metadata?.name ?? user?.email ?? "User"}
               </span>
               <button
                 onClick={handleSignOut}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-(--accent) hover:text-(--accent)"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
                 Sign out
               </button>
             </div>
           </header>
 
-          <section className="flex-1 bg-linear-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm lg:col-span-2">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Roadmap</p>
-                    <h2 className="text-xl font-semibold text-slate-900">Structured Steps</h2>
-                  </div>
+          <section className="flex-1 bg-gradient-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Roadmap</p>
+                <h2 className="text-xl font-semibold text-slate-900">Structured Steps</h2>
+              </div>
+              {isAdmin && (
+                <div className="text-xl">
+                  <i className="fa-solid fa-user-shield bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent"></i>
                 </div>
-                <div className="space-y-3">
-                  {steps.map((step) => (
-                    <div key={step.title} className="rounded-xl border border-slate-100 bg-white/90 px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
-                      <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
-                        <span>{step.title}</span>
-                        <span className="text-(--accent)">{step.progress}%</span>
+              )}
+            </div>
+            <div className="grid gap-8 lg:grid-cols-2">
+              {phases.map((phase, index) => {
+                const isLeft = index % 2 === 0;
+                const skewClass = isLeft ? "-skew-x-6" : "skew-x-6";
+                const unSkewClass = isLeft ? "skew-x-6" : "-skew-x-6";
+
+                return (
+                  <div
+                    key={phase.title}
+                    className={`transform rounded-2xl border border-slate-200 shadow-sm ${skewClass} ${phaseColors[index]}`}>
+                    <div className={`transform p-6 ${unSkewClass}`}>
+                      <div className="mb-4">
+                        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                          {phase.title.split(":")[0]}
+                        </h3>
+                        <p className="text-lg font-semibold text-slate-800">{phase.title.split(":")[1]}</p>
                       </div>
-                      <div className="mt-2 h-2 rounded-full bg-slate-100">
-                        <div
-                          className="h-2 rounded-full bg-(--accent) transition-all"
-                          style={{ width: `${step.progress}%` }}
-                        />
+                      <div className="space-y-3">
+                        {phase.items.map((item) => (
+                          <div
+                            key={item.title}
+                            className={`transform rounded-xl border border-slate-100 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)] ${skewClass}`}>
+                            <div className={`p-4 ${unSkewClass}`}>
+                              <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
+                                <span>{item.title}</span>
+                                <span className="text-[var(--accent)]">{item.progress}%</span>
+                              </div>
+                              <div className="mt-2 h-2 rounded-full bg-slate-100">
+                                <div
+                                  className="h-2 rounded-full bg-[var(--accent)] transition-all"
+                                  style={{ width: `${item.progress}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         </div>

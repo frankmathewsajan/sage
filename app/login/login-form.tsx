@@ -27,6 +27,10 @@ export default function LoginForm() {
       return;
     }
 
+    if (data.session.user.email === "frankmathewsajan@gmail.com") {
+      document.cookie = `isAdmin=true; Path=/; Max-Age=604800; SameSite=Lax`;
+    }
+
     const token = data.session.access_token;
     document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
 
