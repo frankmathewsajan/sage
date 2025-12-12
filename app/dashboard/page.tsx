@@ -50,6 +50,12 @@ export default function DashboardPage() {
     return acc;
   }, [] as { title: string; items: typeof steps }[]);
 
+  // Helper to chunk phases into pairs (Rows)
+  const rows = [];
+  for (let i = 0; i < phases.length; i += 2) {
+    rows.push(phases.slice(i, i + 2));
+  }
+
   const phaseColors = [
     "bg-gradient-to-br from-amber-50 via-white to-amber-100",
     "bg-gradient-to-br from-red-50 via-white to-red-100",
@@ -70,6 +76,7 @@ export default function DashboardPage() {
       style={{ backgroundImage: "var(--gradient-login)" }}
     >
       <div className="flex min-h-screen flex-row">
+        {/* Sidebar */}
         <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-8 shadow-sm lg:block">
           <div className="mb-8 pl-3" />
           <nav className="space-y-2 text-sm font-semibold text-slate-700">
@@ -101,7 +108,8 @@ export default function DashboardPage() {
         </aside>
 
         <div className="relative flex flex-1 flex-col">
-          <header className="fixed right-0 top-0 left-0 flex items-center justify-end border-b border-slate-200 bg-white/90 px-6 py-4 shadow-sm lg:left-64">
+          {/* Header */}
+          <header className="fixed right-0 top-0 left-0 flex items-center justify-end border-b border-slate-200 bg-white/90 px-6 py-4 shadow-sm lg:left-64 z-10">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-slate-800">
                 {user?.user_metadata?.name ?? user?.email ?? "User"}
@@ -115,8 +123,9 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          <section className="flex-1 bg-gradient-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24">
-            <div className="mb-4 flex items-center justify-between">
+          {/* Main Content */}
+          <section className="flex-1 bg-gradient-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24 pb-12">
+            <div className="mb-8 flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Roadmap</p>
                 <h2 className="text-xl font-semibold text-slate-900">Structured Steps</h2>
@@ -127,48 +136,64 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-            <div className="grid gap-8 lg:grid-cols-2">
-              {phases.map((phase, index) => {
 
-                return (
-                  <div
-                    key={phase.title}
-                    className={`rounded-2xl border border-slate-200 shadow-sm ${phaseColors[index]}`}
-                    style={{ clipPath: 'polygon(0 0, 95% 0, 100% 8%, 100% 100%, 0 100%)' }}
-                  >
-                    <div className="p-4">
-                      <div className="mb-3">
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          {phase.title.split(":")[0]}
-                        </h3>
-                        <p className="text-base font-semibold text-slate-800">{phase.title.split(":")[1]}</p>
-                      </div>
-                      <div className="space-y-2">
-                        {phase.items.map((item) => (
-                          <div
-                            key={item.title}
-                            className={'rounded-lg border border-slate-100 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)]'}
-                            style={{ clipPath: 'polygon(0 0, 95% 0, 100% 25%, 100% 100%, 0 100%)' }}
-                          >
-                            <div className="p-3">
-                              <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
-                                <span>{item.title}</span>
-                                <span className="text-[var(--accent)]">{item.progress}%</span>
-                              </div>
-                              <div className="mt-1 h-1.5 rounded-full bg-slate-100">
-                                <div
-                                  className="h-1.5 rounded-full bg-[var(--accent)] transition-all"
-                                  style={{ width: `${item.progress}%` }}
-                                />
+            {/* NEW SLANTED LAYOUT IMPLEMENTATION */}
+            <div className="flex flex-col gap-6">
+              {rows.map((row, rowIndex) => (
+                <div key={rowIndex} className="flex w-full filter drop-shadow-md">
+                  {row.map((phase, colIndex) => {
+                    // Determine if this is the Left or Right card
+                    const isLeft = colIndex === 0;
+
+                    // Calculate the original index to fetch the correct color
+                    const originalIndex = rowIndex * 2 + colIndex;
+
+                    // Styles based on position (Left vs Right)
+                    // Left: Cut Bottom-Right corner, Rounded Left
+                    // Right: Cut Top-Left corner, Rounded Right, Negative Margin to pull it left
+                    const positionClasses = isLeft
+                      ? "rounded-l-2xl z-10 pr-16 [clip-path:polygon(0_0,100%_0,90%_100%,0_100%)]"
+                      : "rounded-r-2xl z-0 pl-16 -ml-10 [clip-path:polygon(10%_0,100%_0,100%_100%,0%_100%)]";
+
+                    return (
+                      <div
+                        key={phase.title}
+                        className={`w-1/2 p-8 border border-slate-100 ${positionClasses} ${phaseColors[originalIndex]}`}
+                      >
+                        <div className="mb-3">
+                          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            {phase.title.split(":")[0]}
+                          </h3>
+                          <p className="text-base font-semibold text-slate-800">{phase.title.split(":")[1]}</p>
+                        </div>
+                        <div className="space-y-2">
+                          {phase.items.map((item) => (
+                            <div
+                              key={item.title}
+                              className={'rounded-lg border border-slate-100 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)]'}
+                              // Keeping the item's internal clip-path as originally requested
+                              style={{ clipPath: 'polygon(0 0, 95% 0, 100% 25%, 100% 100%, 0 100%)' }}
+                            >
+                              <div className="p-3">
+                                <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+                                  <span>{item.title}</span>
+                                  <span className="text-[var(--accent)]">{item.progress}%</span>
+                                </div>
+                                <div className="mt-1 h-1.5 rounded-full bg-slate-100">
+                                  <div
+                                    className="h-1.5 rounded-full bg-[var(--accent)] transition-all"
+                                    style={{ width: `${item.progress}%` }}
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </section>
         </div>
