@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: var(--font-inter);
+  --font-sans: "TT Commons Pro", var(--font-inter);
   color-scheme: light;
   --background: #f7f5f2;
   --foreground: #121212;

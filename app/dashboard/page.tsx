@@ -51,10 +51,10 @@ export default function DashboardPage() {
   }, [] as { title: string; items: typeof steps }[]);
 
   const phaseColors = [
-    "bg-gradient-to-br from-amber-50 to-white",
-    "bg-gradient-to-br from-red-50 to-white",
-    "bg-gradient-to-br from-purple-50 to-white",
-    "bg-gradient-to-br from-slate-50 to-white",
+    "bg-gradient-to-br from-amber-50 via-white to-amber-100",
+    "bg-gradient-to-br from-red-50 via-white to-red-100",
+    "bg-gradient-to-br from-purple-50 via-white to-purple-100",
+    "bg-gradient-to-br from-slate-50 via-white to-slate-100",
   ];
 
   async function handleSignOut() {
@@ -129,34 +129,35 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-8 lg:grid-cols-2">
               {phases.map((phase, index) => {
-                const isLeft = index % 2 === 0;
-                const skewClass = isLeft ? "-skew-x-6" : "skew-x-6";
-                const unSkewClass = isLeft ? "skew-x-6" : "-skew-x-6";
 
                 return (
                   <div
                     key={phase.title}
-                    className={`transform rounded-2xl border border-slate-200 shadow-sm ${skewClass} ${phaseColors[index]}`}>
-                    <div className={`transform p-6 ${unSkewClass}`}>
-                      <div className="mb-4">
-                        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                    className={`rounded-2xl border border-slate-200 shadow-sm ${phaseColors[index]}`}
+                    style={{ clipPath: 'polygon(0 0, 95% 0, 100% 8%, 100% 100%, 0 100%)' }}
+                  >
+                    <div className="p-4">
+                      <div className="mb-3">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                           {phase.title.split(":")[0]}
                         </h3>
-                        <p className="text-lg font-semibold text-slate-800">{phase.title.split(":")[1]}</p>
+                        <p className="text-base font-semibold text-slate-800">{phase.title.split(":")[1]}</p>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {phase.items.map((item) => (
                           <div
                             key={item.title}
-                            className={`transform rounded-xl border border-slate-100 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)] ${skewClass}`}>
-                            <div className={`p-4 ${unSkewClass}`}>
-                              <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
+                            className={'rounded-lg border border-slate-100 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)]'}
+                            style={{ clipPath: 'polygon(0 0, 95% 0, 100% 25%, 100% 100%, 0 100%)' }}
+                          >
+                            <div className="p-3">
+                              <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
                                 <span>{item.title}</span>
                                 <span className="text-[var(--accent)]">{item.progress}%</span>
                               </div>
-                              <div className="mt-2 h-2 rounded-full bg-slate-100">
+                              <div className="mt-1 h-1.5 rounded-full bg-slate-100">
                                 <div
-                                  className="h-2 rounded-full bg-[var(--accent)] transition-all"
+                                  className="h-1.5 rounded-full bg-[var(--accent)] transition-all"
                                   style={{ width: `${item.progress}%` }}
                                 />
                               </div>
