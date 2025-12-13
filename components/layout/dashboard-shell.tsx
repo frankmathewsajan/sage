@@ -104,7 +104,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </header>
 
           {/* Main Content */}
-          <section className="flex-1 bg-gradient-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24 pb-12">
+          <section className="flex-1 bg-linear-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24 pb-12">
            {children}
           </section>
         </div>

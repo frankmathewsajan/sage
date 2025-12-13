@@ -85,7 +85,15 @@ export function PracticeTracker() {
         extractTitle(url);
       }
     }, 500);
-    re// Calculate next review date based on spaced repetition
+    return () => clearTimeout(timeoutId);
+  }, [url]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      // Calculate next review date based on spaced repetition
       const nextReview = new Date(solvedDate);
       nextReview.setDate(nextReview.getDate() + 3); // First review after 3 days
 
@@ -127,7 +135,35 @@ export function PracticeTracker() {
       
       const updates: any = {
         reviewCount: currentReviewCount + 1,
-      }; for GitHub-style heatmap
+      };
+
+      if (nextInterval) {
+        const nextReview = new Date();
+        nextReview.setDate(nextReview.getDate() + nextInterval);
+        updates.nextReviewDate = nextReview.toISOString().split("T")[0];
+      } else {
+        updates.nextReviewDate = null;
+        updates.neuralPathwayCreated = true;
+      }
+
+      await updateDoc(doc(db, "problems", problemId), updates);
+      await loadProblems();
+    } catch (error) {
+      console.error("Error marking as reviewed:", error);
+    }
+  }
+
+  async function handleDelete(problemId: string) {
+    if (!confirm("Are you sure you want to delete this problem?")) return;
+    try {
+      await deleteDoc(doc(db, "problems", problemId));
+      await loadProblems();
+    } catch (error) {
+      console.error("Error deleting problem:", error);
+    }
+  }
+
+  // Get calendar data for GitHub-style heatmap
   const getCalendarData = () => {
     const calendar: { [key: string]: number } = {};
     problems.forEach((problem) => {
@@ -166,75 +202,197 @@ export function PracticeTracker() {
       }
       problemsByPattern[problem.pattern].push(problem);
     }
-  });   // Reload problems
-      await loadProblems();
-    } catch (error) {
-      console.error("Error adding problem:", error);
-    }
-  }
+  });
 
-  async function handleDelete(problemId: string) {
-    if (!confirm("Are you sure you want to delete this problem?")) return;
-    try {
-      await deleteDoc(doc(db, "problems", problemId));
-      await loadProblems();
-    } catch (error) {
-      console.error("Error deleting problem:", error);
-    }
-  }
-
-  // Get calendar data
-  const getCalendarData = () => {
-    const calendar: { [key: string]: number } = {};
-    problems.forEach((problem) => {
-      calendar[problem.solvedDate] = (calendar[problem.solvedDate] || 0) + 1;
-    });
-    return calendar;
-  };
-
-  const calendarData = getCalendarData();
-  const today = new Date();- GitHub Style */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Activity Calendar</h2>
-        <div className="overflow-x-auto pb-2">
-          <div className="inline-flex gap-1">
-            {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="flex flex-col gap-1">
-                {week.map((day, dayIndex) => (
-                  <div
-                    key={day.date}
-                    className={`h-3 w-3 rounded-sm transition-colors ${
-                      day.count === 0
-                        ? "bg-slate-100 hover:bg-slate-200"
-                        : day.count === 1
-                        ? "bg-emerald-300 hover:bg-emerald-400"
-                        : day.count === 2
-                        ? "bg-emerald-500 hover:bg-emerald-600"
-                        : day.count >= 3
-                        ? "bg-emerald-700 hover:bg-emerald-800"
-                        : "bg-emerald-900 hover:bg-emerald-950"
-                    }`}
-                    title={`${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}: ${day.count} problem${day.count !== 1 ? 's' : ''}`}
-                  />
-                ))}
-              </div>
-            ))}
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+              <i className="fa-solid fa-check text-xl text-blue-600" aria-hidden />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-slate-900">{problems.length}</p>
+              <p className="text-sm text-slate-600">Total Solved</p>
+            </div>
           </div>
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span>Less</span>
-              <div className="h-3 w-3 rounded-sm bg-slate-100 border border-slate-200" />
-              <div className="h-3 w-3 rounded-sm bg-emerald-300" />
-              <div className="h-3 w-3 rounded-sm bg-emerald-500" />
-              <div className="h-3 w-3 rounded-sm bg-emerald-700" />
-              <div className="h-3 w-3 rounded-sm bg-emerald-900" />
-              <span>More</span>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100">
+              <i className="fa-solid fa-fire text-xl text-emerald-600" aria-hidden />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-slate-900">
+                {problems.filter((p) => p.solvedDate === new Date().toISOString().split("T")[0]).length}
+              </p>
+              <p className="text-sm text-slate-600">Solved Today</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+              <i className="fa-solid fa-calendar text-xl text-purple-600" aria-hidden />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-slate-900">
+                {Object.keys(calendarData).length}
+              </p>
+              <p className="text-sm text-slate-600">Active Days</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Review Reminders - Modern Centered Design */}
+      {/* Calendar Heatmap - GitHub/LeetCode Style */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">
+          {problems.filter((p) => p.solvedDate >= new Date(new Date().getFullYear(), 0, 1).toISOString().split("T")[0]).length} problems in the last year
+        </h2>
+        <div className="overflow-x-auto">
+          <div className="inline-flex gap-0.5">
+            {/* Day labels */}
+            <div className="flex flex-col justify-around pr-2 text-[10px] text-slate-500">
+              <span>Mon</span>
+              <span className="invisible">Tue</span>
+              <span>Wed</span>
+              <span className="invisible">Thu</span>
+              <span>Fri</span>
+              <span className="invisible">Sat</span>
+              <span className="invisible">Sun</span>
+            </div>
+            
+            {/* Calendar grid */}
+            {weeks.map((week, weekIndex) => {
+              const firstDay = week[0];
+              const showMonth = new Date(firstDay.date).getDate() <= 7;
+              const monthLabel = showMonth ? new Date(firstDay.date).toLocaleDateString('en-US', { month: 'short' }) : '';
+              
+              return (
+                <div key={weekIndex} className="flex flex-col gap-0.5">
+                  {/* Month label */}
+                  <div className="h-3 text-[10px] text-slate-500 -ml-1">
+                    {monthLabel}
+                  </div>
+                  {/* Days */}
+                  {week.map((day) => (
+                    <div
+                      key={day.date}
+                      className={`h-2.5 w-2.5 rounded-[2px] cursor-pointer border border-slate-200/50 transition-all hover:border-slate-400 ${
+                        day.count === 0
+                          ? "bg-slate-100"
+                          : day.count === 1
+                          ? "bg-emerald-300"
+                          : day.count === 2
+                          ? "bg-emerald-500"
+                          : day.count === 3
+                          ? "bg-emerald-600"
+                          : "bg-emerald-700"
+                      }`}
+                      title={`${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}: ${day.count} problem${day.count !== 1 ? 's' : ''}`}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+          
+          <div className="mt-4 flex items-center justify-end gap-2 text-xs text-slate-600">
+            <span>Less</span>
+            <div className="h-2.5 w-2.5 rounded-[2px] bg-slate-100 border border-slate-200" />
+            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-300 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-500 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-600 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-700 border border-slate-200/50" />
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Review Reminders */}
+      {needsReview.length > 0 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <i className="fa-solid fa-bell text-xl text-amber-600" aria-hidden />
+            <div className="flex-1">
+              <h2 className="mb-2 text-lg font-semibold text-amber-900">
+                {needsReview.length} Problem{needsReview.length !== 1 ? 's' : ''} Need Review
+              </h2>
+              <p className="mb-3 text-sm text-amber-800">
+                Time to review these problems to reinforce your understanding using spaced repetition.
+              </p>
+              <div className="space-y-2">
+                {needsReview.map((problem) => (
+                  <div key={problem.id} className="flex items-center justify-between rounded-lg bg-white p-3">
+                    <a
+                      href={problem.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      {problem.title}
+                    </a>
+                    <button
+                      onClick={() => markAsReviewed(problem.id, problem.reviewCount)}
+                      className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-600"
+                    >
+                      Mark Reviewed
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pattern Baskets */}
+      {Object.keys(problemsByPattern).length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">Problems by Pattern (Needs Review)</h2>
+          <div className="space-y-4">
+            {Object.entries(problemsByPattern).map(([patternName, patternProblems]) => (
+              <div key={patternName} className="rounded-lg border border-slate-200 p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="font-semibold text-slate-900">{patternName}</h3>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    {patternProblems.length} problem{patternProblems.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {patternProblems.map((problem) => (
+                    <a
+                      key={problem.id}
+                      href={problem.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      • {problem.title}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add Problem Button */}
+      <button
+        onClick={() => setShowForm(!showForm)}
+        className="w-full rounded-xl border-2 border-dashed border-slate-300 bg-white p-6 text-center text-slate-600 transition hover:border-blue-500 hover:text-blue-500"
+      >
+        <i className="fa-solid fa-plus mb-2 text-2xl" aria-hidden />
+        <p className="font-semibold">Add New Problem</p>
+      </button>
+
+      {/* Add Problem Form - Modern Centered Design */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl">
@@ -359,7 +517,7 @@ export function PracticeTracker() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:from-blue-600 hover:to-blue-700"
+                  className="flex-1 rounded-lg bg-linera-to-r from-blue-500 to-blue-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:from-blue-600 hover:to-blue-700"
                 >
                   Add Problem
                 </button>
@@ -372,22 +530,27 @@ export function PracticeTracker() {
                 </button>
               </div>
             </form>
-          </divlassName="grid grid-flow-col auto-cols-max gap-1">
-            {calendarDays.map((day) => (
+          </div>
+        </div>
+      )}
+
+      {/* Problems List */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Solved Problems</h2>
+        {loading ? (
+          <p className="text-center text-slate-600">Loading...</p>
+        ) : problems.length === 0 ? (
+          <p className="text-center text-slate-600">No problems tracked yet. Add your first one!</p>
+        ) : (
+          <div className="space-y-3">
+            {problems.map((problem) => (
               <div
-                key={day.date}
-                className={`h-3 w-3 rounded-sm ${
-                  day.count === 0
-                    ? "bg-slate-100"
-                    : day.count === 1
-                    ? "bg-emerald-200"
-                    : day.count === 2
-                    ? "bg-emerald-400"
-                    : "bg-emerald-600"
-                }`}
-                title={`${day.date}: ${day.count} problem(s)`}
-              />
-            ))} flex-wrap">
+                key={problem.id}
+                className="rounded-lg border border-slate-200 p-4 transition hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <i className="fa-solid fa-check-circle text-emerald-500" aria-hidden />
                       <a
                         href={problem.url}
@@ -434,146 +597,7 @@ export function PracticeTracker() {
                           <span>Reviewed {problem.reviewCount}x</span>
                         </>
                       )}
-                    </divorm */}
-      {showForm && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900">Add LeetCode Problem</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Problem URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://leetcode.com/problems/..."
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={extractTitle}
-                  disabled={extracting || !url}
-                  className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:opacity-50"
-                >
-                  {extracting ? "Extracting..." : "Extract Title"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Problem Title
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Two Sum"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Description
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Brief description of the problem..."
-                rows={3}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Notes
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Your solution approach, time complexity, etc..."
-                rows={4}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Solved Date
-              </label>
-              <input
-                type="date"
-                value={solvedDate}
-                onChange={(e) => setSolvedDate(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
-              >
-                Add Problem
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Problems List */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Solved Problems</h2>
-        {loading ? (
-          <p className="text-center text-slate-600">Loading...</p>
-        ) : problems.length === 0 ? (
-          <p className="text-center text-slate-600">No problems tracked yet. Add your first one!</p>
-        ) : (
-          <div className="space-y-3">
-            {problems.map((problem) => (
-              <div
-                key={problem.id}
-                className="rounded-lg border border-slate-200 p-4 transition hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <i className="fa-solid fa-check-circle text-emerald-500" aria-hidden />
-                      <a
-                        href={problem.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-lg font-semibold text-blue-600 hover:text-blue-700"
-                      >
-                        {problem.title}
-                      </a>
                     </div>
-                    {problem.description && (
-                      <p className="mt-2 text-sm text-slate-600">{problem.description}</p>
-                    )}
-                    {problem.notes && (
-                      <div className="mt-2 rounded-md bg-slate-50 p-3">
-                        <p className="text-xs font-semibold text-slate-700">Notes:</p>
-                        <p className="mt-1 text-sm text-slate-600 whitespace-pre-wrap">{problem.notes}</p>
-                      </div>
-                    )}
-                    <p className="mt-2 text-xs text-slate-500">
-                      Solved on {new Date(problem.solvedDate).toLocaleDateString()}
-                    </p>
                   </div>
                   <button
                     onClick={() => handleDelete(problem.id)}
