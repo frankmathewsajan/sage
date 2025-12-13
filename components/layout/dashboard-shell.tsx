@@ -6,7 +6,7 @@ import { useAuth } from "@/app/providers/auth-provider";
 import { signOut } from "firebase/auth";
 import { firebaseAuth } from "@/app/lib/firebase-browser";
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({ children, pageTitle }: { children: React.ReactNode; pageTitle?: string }) {
   const { user } = useAuth();
   const [isMinimized, setIsMinimized] = useState(false);
 
@@ -24,7 +24,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     >
       <div className="flex min-h-screen flex-row">
         {/* Sidebar */}
-        <aside className={`hidden border-r border-slate-200 bg-white/90 py-8 shadow-sm lg:block transition-all duration-300 ${isMinimized ? 'w-20' : 'w-64'}`}>
+        <aside className={`hidden border-r border-slate-200 bg-white/90 py-8 shadow-sm lg:block transition-all duration-300 fixed top-0 left-0 h-screen z-20 ${isMinimized ? 'w-20' : 'w-64'}`}>
           <div className="mb-8 flex items-center justify-between px-5">
             {!isMinimized && <div className="pl-3" />}
             <button
@@ -89,7 +89,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         <div className="relative flex flex-1 flex-col">
           {/* Header */}
-          <header className={`fixed right-0 top-0 left-0 flex items-center justify-end border-b border-slate-200 bg-white/90 px-6 py-4 shadow-sm z-10 transition-all duration-300 ${isMinimized ? 'lg:left-20' : 'lg:left-64'}`}>
+          <header className={`fixed right-0 top-0 left-0 flex items-center justify-between border-b border-slate-200 bg-white/90 backdrop-blur-sm px-6 py-4 shadow-sm z-30 transition-all duration-300 ${isMinimized ? 'lg:left-20' : 'lg:left-64'}`}>
+            {pageTitle && (
+              <h1 className="text-xl font-bold text-slate-900">{pageTitle}</h1>
+            )}
+            {!pageTitle && <div />}
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-slate-800">
                 {user?.displayName ?? user?.email ?? "User"}
@@ -104,8 +108,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </header>
 
           {/* Main Content */}
-          <section className="flex-1 bg-linear-to-br from-white to-slate-50 px-6 pt-20 lg:pt-24 pb-12">
-           {children}
+          <section className={`flex-1 bg-linear-to-br from-white to-slate-50 px-4 sm:px-6 pt-20 lg:pt-24 pb-12 transition-all duration-300 overflow-x-hidden ${isMinimized ? 'lg:ml-20' : 'lg:ml-64'}`}>
+            <div className="mx-auto max-w-7xl w-full">
+              {children}
+            </div>
           </section>
         </div>
       </div>
