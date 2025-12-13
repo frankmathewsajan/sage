@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/app/lib/supabase-browser";
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from "firebase/auth";
+import { firebaseAuth } from "@/app/lib/firebase-browser";
 
 export default function SignupForm() {
   const [loading, setLoading] = useState(false);
@@ -31,50 +32,40 @@ export default function SignupForm() {
       return;
     }
 
-    const { data, error } = await supabaseBrowser.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-      },
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      const user = userCredential.user;
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
+      // Update user profile with display name
+      await updateProfile(user, { displayName: name });
 
-    if (data.session?.access_token) {
-      document.cookie = `sage-auth=${data.session.access_token}; Path=/; Max-Age=604800; SameSite=Lax`;
+      const token = await user.getIdToken();
+      document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
+
       router.push("/dashboard");
-      return;
+    } catch (err: any) {
+      setError(err?.message ?? "Unable to create account.");
+      setLoading(false);
     }
-
-    setMessage("Check your email to confirm your account.");
-    setLoading(false);
   }
 
   async function onGoogle() {
     setError(null);
     setMessage(null);
     setLoading(true);
-    const { data, error } = await supabaseBrowser.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
-      },
-    });
-    if (error) {
-      setError(error.message);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(firebaseAuth, provider);
+      const user = result.user;
+
+      const token = await user.getIdToken();
+      document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err?.message ?? "Unable to sign in with Google.");
       setLoading(false);
-      return;
     }
-    if (data?.url) {
-      window.location.href = data.url;
-      return;
-    }
-    setLoading(false);
   }
 
   return (

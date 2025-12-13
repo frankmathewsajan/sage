@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { MascotLottie } from "@/app/components/mascot-lottie";
-import GoogleOneTap from "@/app/components/google-one-tap";
 import LoginForm from "@/app/login/login-form";
 
 export const metadata = {
@@ -23,7 +22,6 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-5xl rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-2xl shadow-sky-900/20 backdrop-blur sm:p-10">
-        <GoogleOneTap />
         <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-14">
           <div className="flex-1 space-y-6">
             <div className="space-y-3">

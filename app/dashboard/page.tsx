@@ -27,7 +27,7 @@ export default function DashboardPage() {
         </div>
         {isAdmin && (
           <div className="text-xl">
-            <i className="fa-solid fa-user-shield bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent"></i>
+            <i className="fa-solid fa-user-shield bg-linear-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent"></i>
           </div>
         )}
       </div>

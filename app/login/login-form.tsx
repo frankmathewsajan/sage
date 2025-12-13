@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/app/lib/supabase-browser";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { firebaseAuth } from "@/app/lib/firebase-browser";
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
@@ -20,42 +21,44 @@ export default function LoginForm() {
     const email = String(formData.get("email") || "").trim();
     const password = String(formData.get("password") || "");
 
-    const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
-    if (error || !data.session) {
-      setError(error?.message ?? "Unable to sign in. Check your credentials and try again.");
+    try {
+      const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const user = userCredential.user;
+
+      if (user.email === "frankmathewsajan@gmail.com") {
+        document.cookie = `isAdmin=true; Path=/; Max-Age=604800; SameSite=Lax`;
+      }
+
+      const token = await user.getIdToken();
+      document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err?.message ?? "Unable to sign in. Check your credentials and try again.");
       setLoading(false);
-      return;
     }
-
-    if (data.session.user.email === "frankmathewsajan@gmail.com") {
-      document.cookie = `isAdmin=true; Path=/; Max-Age=604800; SameSite=Lax`;
-    }
-
-    const token = data.session.access_token;
-    document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
-
-    router.push("/dashboard");
   }
 
   async function onGoogle() {
     setError(null);
     setLoading(true);
-    const { data, error } = await supabaseBrowser.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
-      },
-    });
-    if (error) {
-      setError(error.message);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(firebaseAuth, provider);
+      const user = result.user;
+
+      if (user.email === "frankmathewsajan@gmail.com") {
+        document.cookie = `isAdmin=true; Path=/; Max-Age=604800; SameSite=Lax`;
+      }
+
+      const token = await user.getIdToken();
+      document.cookie = `sage-auth=${token}; Path=/; Max-Age=604800; SameSite=Lax`;
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err?.message ?? "Unable to sign in with Google.");
       setLoading(false);
-      return;
     }
-    if (data?.url) {
-      window.location.href = data.url;
-      return;
-    }
-    setLoading(false);
   }
 
   return (
