@@ -96,7 +96,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </span>
               <button
                 onClick={handleSignOut}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-(--accent) hover:text-(--accent)"
               >
                 Sign out
               </button>

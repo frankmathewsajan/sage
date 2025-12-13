@@ -283,7 +283,7 @@ export function PracticeTracker() {
                   {week.map((day) => (
                     <div
                       key={day.date}
-                      className={`h-2.5 w-2.5 rounded-[2px] cursor-pointer border border-slate-200/50 transition-all hover:border-slate-400 ${
+                      className={`h-2.5 w-2.5 rounded-xs cursor-pointer border border-slate-200/50 transition-all hover:border-slate-400 ${
                         day.count === 0
                           ? "bg-slate-100"
                           : day.count === 1
@@ -304,11 +304,11 @@ export function PracticeTracker() {
           
           <div className="mt-4 flex items-center justify-end gap-2 text-xs text-slate-600">
             <span>Less</span>
-            <div className="h-2.5 w-2.5 rounded-[2px] bg-slate-100 border border-slate-200" />
-            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-300 border border-slate-200/50" />
-            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-500 border border-slate-200/50" />
-            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-600 border border-slate-200/50" />
-            <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-700 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-xs bg-slate-100 border border-slate-200" />
+            <div className="h-2.5 w-2.5 rounded-xs bg-emerald-300 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-xs bg-emerald-500 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-xs bg-emerald-600 border border-slate-200/50" />
+            <div className="h-2.5 w-2.5 rounded-xs bg-emerald-700 border border-slate-200/50" />
             <span>More</span>
           </div>
         </div>
